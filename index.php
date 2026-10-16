@@ -9,9 +9,7 @@ if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'pengunj
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['role'])) {
     $role = $_POST['role'];
-    if (in_array($role, ['admin', 'pengunjung'], true)) {
-        $_SESSION['role'] = $role;
-    }
+    $_SESSION['role'] = tentukanRole($role);
 }
 
 $is_admin = $_SESSION['role'] === 'admin';
@@ -30,25 +28,51 @@ if (!isset($_SESSION['nama_terpanggil'])) {
     $_SESSION['nama_terpanggil'] = '';
 }
 
-// ini buat ambil nomor antrean baru
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ambil'])) {
-    $nama = trim($_POST['nama_pasien'] ?? 'Pasien');
+function tentukanRole($role) {
+    $allowed = ['admin', 'pengunjung'];
+    return in_array($role, $allowed, true) ? $role : 'pengunjung';
+}
+
+function ambilNomor($nama) {
     $nomor_baru = count($_SESSION['antrean']) + 1;
-    // Enqueue: masukkan ke akhir array (queue)
     $_SESSION['antrean'][] = [
         'nomor' => $nomor_baru,
         'nama' => $nama,
         'waktu' => date('H:i:s')
     ];
+    return $nomor_baru;
+}
+
+function resetAntrean() {
+    $_SESSION['antrean'] = [];
+    $_SESSION['nomor_terpanggil'] = 0;
+    $_SESSION['nama_terpanggil'] = '';
+}
+
+function bubbleSortAntrean(&$arr) {
+    $n = count($arr);
+    for ($i = 0; $i < $n - 1; $i++) {
+        for ($j = 0; $j < $n - $i - 1; $j++) {
+            if ($arr[$j]['nomor'] > $arr[$j + 1]['nomor']) {
+                $temp = $arr[$j];
+                $arr[$j] = $arr[$j + 1];
+                $arr[$j + 1] = $temp;
+            }
+        }
+    }
+}
+
+// ini buat ambil nomor antrean baru
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ambil'])) {
+    $nama = trim($_POST['nama_pasien'] ?? 'Pasien');
+    $nomor_baru = ambilNomor($nama);
     $pesan = "Nomor antrean $nomor_baru berhasil diambil oleh $nama.";
 }
 
 // Proses reset antrean
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reset'])) {
     if ($is_admin) {
-        $_SESSION['antrean'] = [];
-        $_SESSION['nomor_terpanggil'] = 0;
-        $_SESSION['nama_terpanggil'] = '';
+        resetAntrean();
         $pesan = "Antrean berhasil direset.";
     } else {
         $pesan = "Hanya admin yang dapat mereset antrean.";
@@ -81,6 +105,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cari'])) {
     }
     if ($hasil_cari === null) {
         $pesan_cari = "Nomor antrean $cari_nomor tidak ditemukan.";
+    } else {
+        $pesan_cari = "Ditemukan nomor antrean $cari_nomor.";
     }
 }
 ?>
@@ -422,11 +448,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cari'])) {
         <?php if (empty($_SESSION['antrean'])): ?>
             <p>Tidak ada antrean.</p>
         <?php else: ?>
-            <?php foreach ($_SESSION['antrean'] as $item): ?>
+            <?php
+            $antrean = $_SESSION['antrean'];
+            bubbleSortAntrean($antrean);
+            for ($i = 0; $i < count($antrean); $i++) {
+                $item = $antrean[$i];
+            ?>
                 <div class="item">
                     <strong>Nomor: <?= $item['nomor'] ?></strong> | Nama: <?= htmlspecialchars($item['nama']) ?> | Waktu: <?= $item['waktu'] ?>
                 </div>
-            <?php endforeach; ?>
+            <?php } ?>
         <?php endif; ?>
     </div>
 
