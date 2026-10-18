@@ -464,12 +464,12 @@ $riwayat_tampil = array_reverse($_SESSION['riwayat']);
             form.requestSubmit(button);
         }
     </script>
-    <link href='https:
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
 </head>
 <body>
 <div class="container">
     <header class="header">
-        <h1><i class='bx bx-clinic'></i> Antrean Klinik</h1>
+        <h1><i class='bx bx-clinic'></i> <i class='bx bxs-hospital'></i> Antrean Klinik</h1>
         <form method="post" class="role-form">
             <label for="role">Role:</label>
             <select id="role" name="role" class="role-select" onchange="this.form.submit()">
@@ -514,6 +514,8 @@ $riwayat_tampil = array_reverse($_SESSION['riwayat']);
             <div class="row-btn">
                 <button type="submit" name="panggil" class="btn btn-panggil" onclick="playTingTung(event);"><i class='bx bx-bell'></i> Panggil Nomor Berikutnya</button>
                 <button type="submit" name="undo" class="btn btn-undo"><i class='bx bx-undo'></i> Undo Panggilan</button>
+            </div>
+            <div class="row-btn" style="margin-top: 8px;">
                 <button type="submit" name="reset" class="btn btn-reset"><i class='bx bx-refresh'></i> Reset Antrean</button>
             </div>
         </form>
@@ -537,7 +539,7 @@ $riwayat_tampil = array_reverse($_SESSION['riwayat']);
     <form method="post" class="form-spaced">
         <label for="cari-nama" class="label-cari">Cari Nama:</label>
         <input type="text" id="cari-nama" name="cari_nama" placeholder="Nama pasien" class="input-cari">
-        <button type="submit" name="cari_binary" class="btn btn-binary"><i class='bx bx-search-alt'></i> Cari Nama</button>
+        <button type="submit" name="cari_binary" class="btn btn-binary"><i class='bx bx-search'></i> Cari Nama</button>
     </form>
 
     <?php if ($hasil_binary): ?>
